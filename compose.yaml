@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-#    ports:
-#      - 8080:8080
     volumes:
       - ./friendly_fishstick:/friendly_fishstick
     environment:
@@ -22,8 +20,6 @@ services:
       - "MONGO_INITDB_ROOT_PASSWORD=secret"
       - "MONGO_INITDB_ROOT_USERNAME=root"
       - "MONGO_INITDB_DATABASE=shop"
-#    ports:
-#      - "27017:27017"
     volumes:
       - "./init.js:/docker-entrypoint-initdb.d/init-mongo.js"
     network_mode: "host"
