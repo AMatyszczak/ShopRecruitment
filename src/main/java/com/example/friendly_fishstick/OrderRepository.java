@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface OrderRepository extends MongoRepository<Order, String> {
 
-    public List<Order> findByName(String name);
+    public List<Order> findByCreatedBy(String createdBy);
 }
