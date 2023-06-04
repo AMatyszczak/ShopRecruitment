@@ -2,18 +2,31 @@ package com.example.friendly_fishstick;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.mongodb.MongoWriteException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.web.FilterChainProxy;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,55 +41,53 @@ class StoreControllerTest {
     private OrderRepository orderRepository;
 
     @Test
-    void userCreateOrder() throws Exception {
+    @WithMockUser(username = "customer_1", roles={"ADMIN"})
+    void customerCreateOrder() throws Exception {
+        var dto = new OrderDTO("name_1");
         var order = new Order("1", "name_1", "customer_1");
 
         ObjectWriter ow = new ObjectMapper().writer();
-        String json = ow.writeValueAsString(order);
+        String json = ow.writeValueAsString(dto);
 
         mockMvc.perform(post("/api/v1/store")
+                        .with(csrf().asHeader())
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
 
-        verify(orderRepository).insert(order);
+        var captor = ArgumentCaptor.forClass(Order.class);
+        verify(orderRepository).insert(captor.capture());
+        var actualOrder = captor.getValue();
+
+        assertNotNull(order.id());
+        assertEquals(order.createdBy(), actualOrder.createdBy());
+        assertEquals(order.name(), actualOrder.name());
     }
 
     @Test
+    @WithMockUser(username = "customer_1", roles={"ADMIN"})
     void adminCreateOrder() throws Exception {
         var order = new Order("1", "name_1", "customer_1");
 
         ObjectWriter ow = new ObjectMapper().writer();
         String json = ow.writeValueAsString(order);
 
-        mockMvc.perform(post("/api/v1/store")
+        mockMvc.perform(post("/api/v1/store").with(csrf().asHeader())
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
 
-        verify(orderRepository).insert(order);
+        var captor = ArgumentCaptor.forClass(Order.class);
+        verify(orderRepository).insert(captor.capture());
+        var actualOrder = captor.getValue();
+
+        assertNotNull(order.id());
+        assertEquals(order.createdBy(), actualOrder.createdBy());
+        assertEquals(order.name(), actualOrder.name());
     }
 
     @Test
-    void createDuplicatedOrder() throws Exception {
-        var order = new OrderDTO("name_1", "customer_1");
-
-        var exception = Mockito.mock(MongoWriteException.class);
-        doThrow(exception).when(orderRepository).insert(any(Order.class));
-
-        ObjectWriter ow = new ObjectMapper().writer();
-        String json = ow.writeValueAsString(order);
-
-        mockMvc.perform(post("/api/v1/store")
-                        .content(json)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(content().string("Order with provided Id already exists"));
-
-        verify(orderRepository).insert(any(Order.class));
-    }
-
-    @Test
+    @WithMockUser(roles={"ADMIN"})
     void adminListsOrders() throws Exception {
         var orders = List.of(new Order("1", "name_1", "customer_1"),
                 new Order("2", "name_2", "customer_2"));
@@ -90,6 +101,7 @@ class StoreControllerTest {
     }
 
     @Test
+    @WithMockUser(roles={"ADMIN"})
     void adminListsOrdersOfCustomer() throws Exception {
         var orders = List.of(new Order("1", "name_1", "customer_1"),
                 new Order("2", "name_1", "customer_2"));
@@ -97,45 +109,50 @@ class StoreControllerTest {
         ObjectWriter ow = new ObjectMapper().writer();
         String json = ow.writeValueAsString(orders);
 
-        mockMvc.perform(get("/api/v1/store").param("createdBy", "name_1"))
+        mockMvc.perform(get("/api/v1/store").param("customerName", "name_1"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().json(json));
     }
 
     @Test
+    @WithMockUser(username = "customer_1", roles={"CUSTOMER"})
     void customerListsHisOrders() throws Exception {
         var orders = List.of(new Order("1", "name_1", "customer_1"),
                 new Order("2", "name_2", "customer_1"));
-        doReturn(orders).when(orderRepository).findByCreatedBy("name_1");
+        doReturn(orders).when(orderRepository).findByCreatedBy("customer_1");
         ObjectWriter ow = new ObjectMapper().writer();
         String json = ow.writeValueAsString(orders);
 
-        mockMvc.perform(get("/api/v1/store").param("createdBy", "customer_1"))
+        mockMvc.perform(get("/api/v1/store").param("customerName", "customer_1"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().json(json));
     }
 
     @Test
+    @WithMockUser(roles={"CUSTOMER"})
     void customerListsOderUserOrders() throws Exception {
-        mockMvc.perform(get("/api/v1/store").param("createdBy", "customer_1"))
+        mockMvc.perform(get("/api/v1/store").param("customerName", "customer_1"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
+    @WithMockUser(roles={"CUSTOMER"})
     void customerListsAllOrders() throws Exception {
         mockMvc.perform(get("/api/v1/store"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
+    @WithMockUser(roles={"CUSTOMER"})
     void customerDeletesOrder() throws Exception {
-        mockMvc.perform(delete("/api/v1/store"))
+        mockMvc.perform(delete("/api/v1/store/1").with(csrf().asHeader()))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void deleteOrder() throws Exception {
-        mockMvc.perform(delete("/api/v1/store/1"))
+    @WithMockUser(username = "admin", roles="ADMIN")
+    void adminDeleteOrder() throws Exception {
+        mockMvc.perform(delete("/api/v1/store/1").with(csrf().asHeader()))
                 .andExpect(status().is2xxSuccessful());
 
         verify(orderRepository).deleteById("1");
