@@ -1,9 +1,9 @@
 FROM eclipse-temurin:17-jdk-alpine AS builder
-WORKDIR /friendly_fishstick
-COPY . /friendly_fishstick
+WORKDIR /shop_recruitment
+COPY . /shop_recruitment
 RUN ./gradlew build -x test
 
 FROM eclipse-temurin:17-jdk-alpine
-COPY --from=builder /friendly_fishstick/build/libs/friendly_fishstick-1.0.0.jar friendly_fishstick.jar
+COPY --from=builder /shop_recruitment/build/libs/shop_recruitment-1.0.0.jar shop_recruitment.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "friendly_fishstick.jar"]
+ENTRYPOINT ["java", "-jar", "shop_recruitment.jar"]

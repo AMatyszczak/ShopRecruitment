@@ -13,12 +13,12 @@ import java.util.UUID;
 
 @SpringBootApplication
 @EnableMongoRepositories
-public class ShopRecruitment {
+public class ShopRecruitmentApplication {
 
-	private static final Logger logger = LoggerFactory.getLogger(ShopRecruitment.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShopRecruitmentApplication.class);
 
 	public static void main(String[] args) {
-		SpringApplication.run(ShopRecruitment.class, args);
+		SpringApplication.run(ShopRecruitmentApplication.class, args);
 	}
 
 

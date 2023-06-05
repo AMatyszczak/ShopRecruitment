@@ -1,12 +1,12 @@
 version: "3"
 
 services:
-  friendly_fishstick:
+  shop_recruitment:
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./friendly_fishstick:/friendly_fishstick
+      - ./shop_recruitment:/shop_recruitment
     environment:
       - SPRING_PROFILES_ACTIVE=production
     depends_on:
