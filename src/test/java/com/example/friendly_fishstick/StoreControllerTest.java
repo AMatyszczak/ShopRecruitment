@@ -3,6 +3,8 @@ package com.example.friendly_fishstick;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -18,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -33,39 +36,19 @@ class StoreControllerTest {
     @MockBean
     private OrderRepository orderRepository;
 
-    @Test
-    @WithMockUser(username = "customer_1", roles="ADMIN")
-    void customerCreateOrder() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"ADMIN", "CUSTOMER"})
+    void customerCreateOrder(String role) throws Exception {
+        var username = "username";
         var dto = new OrderDTO("name_1");
-        var order = new Order("1", "name_1", "customer_1");
+        var order = new Order("1", "name_1", username);
 
         ObjectWriter ow = new ObjectMapper().writer();
         String json = ow.writeValueAsString(dto);
 
         mockMvc.perform(post("/api/v1/store")
                         .with(csrf().asHeader())
-                        .content(json)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful());
-
-        var captor = ArgumentCaptor.forClass(Order.class);
-        verify(orderRepository).insert(captor.capture());
-        var actualOrder = captor.getValue();
-
-        assertNotNull(order.id());
-        assertEquals(order.createdBy(), actualOrder.createdBy());
-        assertEquals(order.name(), actualOrder.name());
-    }
-
-    @Test
-    @WithMockUser(username = "customer_1", roles="ADMIN")
-    void adminCreateOrder() throws Exception {
-        var order = new Order("1", "name_1", "customer_1");
-
-        ObjectWriter ow = new ObjectMapper().writer();
-        String json = ow.writeValueAsString(order);
-
-        mockMvc.perform(post("/api/v1/store").with(csrf().asHeader())
+                        .with(user(username).roles(role))
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
@@ -81,7 +64,7 @@ class StoreControllerTest {
 
     @Test
     @WithMockUser(roles="ADMIN")
-    void adminListsOrders() throws Exception {
+    void adminListsAllOrders() throws Exception {
         var orders = List.of(new Order("1", "name_1", "customer_1"),
                 new Order("2", "name_2", "customer_2"));
         doReturn(orders).when(orderRepository).findAll();
@@ -110,13 +93,15 @@ class StoreControllerTest {
     @Test
     @WithMockUser(username = "customer_1", roles="CUSTOMER")
     void customerListsHisOrders() throws Exception {
-        var orders = List.of(new Order("1", "name_1", "customer_1"),
-                new Order("2", "name_2", "customer_1"));
-        doReturn(orders).when(orderRepository).findByCreatedBy("customer_1");
+        var username = "customer_1";
+
+        var orders = List.of(new Order("1", "name_1", username),
+                new Order("2", "name_2", username));
+        doReturn(orders).when(orderRepository).findByCreatedBy(username);
         ObjectWriter ow = new ObjectMapper().writer();
         String json = ow.writeValueAsString(orders);
 
-        mockMvc.perform(get("/api/v1/store").param("customerName", "customer_1"))
+        mockMvc.perform(get("/api/v1/store").param("customerName", username))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().json(json));
     }
@@ -143,7 +128,7 @@ class StoreControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", roles="ADMIN")
+    @WithMockUser(roles="ADMIN")
     void adminDeleteOrder() throws Exception {
         mockMvc.perform(delete("/api/v1/store/1").with(csrf().asHeader()))
                 .andExpect(status().is2xxSuccessful());
