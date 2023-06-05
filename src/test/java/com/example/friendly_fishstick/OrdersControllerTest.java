@@ -27,8 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Import(SecurityConfig.class)
-@WebMvcTest(StoreController.class)
-class StoreControllerTest {
+@WebMvcTest(OrdersController.class)
+class OrdersControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,12 +46,13 @@ class StoreControllerTest {
         ObjectWriter ow = new ObjectMapper().writer();
         String json = ow.writeValueAsString(dto);
 
-        mockMvc.perform(post("/api/v1/store")
+        mockMvc.perform(post("/api/v1/orders")
                         .with(csrf().asHeader())
                         .with(user(username).roles(role))
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful());
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
 
         var captor = ArgumentCaptor.forClass(Order.class);
         verify(orderRepository).insert(captor.capture());
@@ -71,7 +72,7 @@ class StoreControllerTest {
         ObjectWriter ow = new ObjectMapper().writer();
         String json = ow.writeValueAsString(orders);
 
-        mockMvc.perform(get("/api/v1/store"))
+        mockMvc.perform(get("/api/v1/orders"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().json(json));
     }
@@ -85,7 +86,7 @@ class StoreControllerTest {
         ObjectWriter ow = new ObjectMapper().writer();
         String json = ow.writeValueAsString(orders);
 
-        mockMvc.perform(get("/api/v1/store").param("customerName", "name_1"))
+        mockMvc.perform(get("/api/v1/orders").param("customerName", "name_1"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().json(json));
     }
@@ -101,7 +102,7 @@ class StoreControllerTest {
         ObjectWriter ow = new ObjectMapper().writer();
         String json = ow.writeValueAsString(orders);
 
-        mockMvc.perform(get("/api/v1/store").param("customerName", username))
+        mockMvc.perform(get("/api/v1/orders").param("customerName", username))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().json(json));
     }
@@ -109,28 +110,28 @@ class StoreControllerTest {
     @Test
     @WithMockUser(roles="CUSTOMER")
     void customerListsOderUserOrders() throws Exception {
-        mockMvc.perform(get("/api/v1/store").param("customerName", "customer_1"))
+        mockMvc.perform(get("/api/v1/orders").param("customerName", "customer_1"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(roles="CUSTOMER")
     void customerListsAllOrders() throws Exception {
-        mockMvc.perform(get("/api/v1/store"))
+        mockMvc.perform(get("/api/v1/orders"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(roles = "CUSTOMER")
     void customerDeletesOrder() throws Exception {
-        mockMvc.perform(delete("/api/v1/store/1").with(csrf().asHeader()))
+        mockMvc.perform(delete("/api/v1/orders/1").with(csrf().asHeader()))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(roles="ADMIN")
     void adminDeleteOrder() throws Exception {
-        mockMvc.perform(delete("/api/v1/store/1").with(csrf().asHeader()))
+        mockMvc.perform(delete("/api/v1/orders/1").with(csrf().asHeader()))
                 .andExpect(status().is2xxSuccessful());
 
         verify(orderRepository).deleteById("1");

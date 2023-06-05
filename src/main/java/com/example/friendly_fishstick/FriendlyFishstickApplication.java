@@ -26,10 +26,12 @@ public class FriendlyFishstickApplication {
 	ApplicationListener<ApplicationReadyEvent> readyEventApplicationListener(OrderRepository repo) {
 		repo.deleteAll();
 
-		repo.save(new Order(UUID.randomUUID().toString(), "name_1", "customer_1"));
-		repo.save(new Order(UUID.randomUUID().toString(), "name_2", "customer_1"));
-		repo.save(new Order(UUID.randomUUID().toString(), "name_3", "customer_2"));
-		repo.save(new Order(UUID.randomUUID().toString(), "name_4", "customer_3"));
+		repo.save(new Order(UUID.randomUUID().toString(), "name_1", "customer"));
+		repo.save(new Order(UUID.randomUUID().toString(), "name_2", "customer"));
+		repo.save(new Order(UUID.randomUUID().toString(), "name_3", "customer_1"));
+		repo.save(new Order(UUID.randomUUID().toString(), "name_4", "customer_2"));
+		repo.save(new Order(UUID.randomUUID().toString(), "name_5", "admin"));
+		repo.save(new Order(UUID.randomUUID().toString(), "name_6", "admin"));
 
 
 		logger.info("Initialized database with orders:");

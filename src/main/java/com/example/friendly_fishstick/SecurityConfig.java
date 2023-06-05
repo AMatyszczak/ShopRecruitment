@@ -9,6 +9,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,6 +23,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableWebSecurity
 @Configuration
+@EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
     public static final String ROLE_PREFIX = "ROLE_";
@@ -31,11 +33,16 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auths -> auths
-                        .requestMatchers(HttpMethod.GET, "/api/v1/store/**").hasAnyRole(Role.ADMIN.name(), Role.CUSTOMER.name())
-                        .requestMatchers(HttpMethod.POST, "/api/v1/store/**").hasAnyRole(Role.ADMIN.name(), Role.CUSTOMER.name())
+                        .requestMatchers("/docs", "/swagger-ui", "swagger-ui/**", "/swagger-ui.html/**", "/configuration/**", "/swagger-resources/**", "/v2/api-docs", "/webjars/**", "/v3/api-docs/**")
+                        .permitAll()
+                )
+                .authorizeHttpRequests(auths -> auths
+                        .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").hasAnyRole(Role.ADMIN.name(), Role.CUSTOMER.name())
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").hasAnyRole(Role.ADMIN.name(), Role.CUSTOMER.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasRole(Role.ADMIN.name())
                 )
-                .authorizeHttpRequests(auths -> auths.anyRequest().authenticated())
+
+                .authorizeHttpRequests(auths -> auths.requestMatchers("/**").authenticated())
                 .httpBasic(withDefaults());
         return http.build();
     }

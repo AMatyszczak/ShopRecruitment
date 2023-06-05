@@ -16,6 +16,7 @@ services:
     container_name: mongodb
     restart: always
     image: "mongo:6.0.5"
+    command: mongod --port 27020
     environment:
       - "MONGO_INITDB_ROOT_PASSWORD=secret"
       - "MONGO_INITDB_ROOT_USERNAME=root"
