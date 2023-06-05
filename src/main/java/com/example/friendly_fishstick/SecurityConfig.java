@@ -30,12 +30,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authz -> authz
+                .authorizeHttpRequests(auths -> auths
                         .requestMatchers(HttpMethod.GET, "/api/v1/store/**").hasAnyRole(Role.ADMIN.name(), Role.CUSTOMER.name())
                         .requestMatchers(HttpMethod.POST, "/api/v1/store/**").hasAnyRole(Role.ADMIN.name(), Role.CUSTOMER.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasRole(Role.ADMIN.name())
                 )
-                .authorizeHttpRequests(authz -> authz.anyRequest().authenticated())
+                .authorizeHttpRequests(auths -> auths.anyRequest().authenticated())
                 .httpBasic(withDefaults());
         return http.build();
     }
@@ -46,6 +46,7 @@ public class SecurityConfig {
         return new DefaultAuthenticationEventPublisher(delegate);
     }
 
+    @SuppressWarnings("deprecation")
     @Bean
     @ConditionalOnMissingBean(UserDetailsService.class)
     public InMemoryUserDetailsManager userDetailsService() {

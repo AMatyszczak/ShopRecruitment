@@ -53,8 +53,8 @@ public class StoreController {
         this.orderRepository.deleteById(orderId);
     }
 
-    @ResponseBody
+    @SuppressWarnings({"unused", "EmptyMethod"})
     @ExceptionHandler(UnauthorizedOperationException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    void unauthorizedOperationException(UnauthorizedOperationException ex) {}
+    void unauthorizedOperationException(UnauthorizedOperationException ex) { }
 }
