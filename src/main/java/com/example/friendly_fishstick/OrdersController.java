@@ -14,7 +14,7 @@ import static com.example.friendly_fishstick.SecurityConfig.ROLE_PREFIX;
 
 @RestController
 @RequestMapping("/api/v1/orders")
-@SecurityRequirement(name = "Orders API")
+@SecurityRequirement(name = "Shop API")
 public class OrdersController {
 
     private final OrderRepository orderRepository;
