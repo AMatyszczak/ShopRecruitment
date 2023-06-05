@@ -1,4 +1,4 @@
-package com.example.friendly_fishstick;
+package com.example.shop_recruitment;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 

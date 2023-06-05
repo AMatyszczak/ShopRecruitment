@@ -1,4 +1,4 @@
-package com.example.friendly_fishstick;
+package com.example.shop_recruitment;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationEventPublisher;

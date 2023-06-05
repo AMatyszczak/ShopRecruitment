@@ -1,4 +1,4 @@
-package com.example.friendly_fishstick;
+package com.example.shop_recruitment;
 
 public record OrderDTO(String name) {
 }

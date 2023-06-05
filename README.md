@@ -8,14 +8,14 @@ With installed [docker-compose](https://docs.docker.com/compose/install/) and ru
 * runs on http://localhost:8090
 * exposes swagger documentation on http://localhost:8090/docs \
 ![swagger front page image](docs/swagger-front-page.png "swagger front page")
-* has predefined two users
+* has predefined two users [code](https://github.com/AMatyszczak/friendly-fishstick/blob/main/src/main/java/com/example/friendly_fishstick/SecurityConfig.java#L59)
   * ADMIN 
     * can create orders, list all orders, list order for a particular user, delete orders
     * has predefined credentials: {admin:password}
   * CUSTOMER
     * can create orders, list their own orders
     * has predefined credentials: {customer:password}
-* initially loads database with 6 orders
+* on every run clears and loads database with 6 orders [code](https://github.com/AMatyszczak/friendly-fishstick/blob/main/src/main/java/com/example/friendly_fishstick/FriendlyFishstickApplication.java#L26)
 
 ### MongoDB:
 * exposes port 27020

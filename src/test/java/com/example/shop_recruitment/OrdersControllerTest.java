@@ -1,4 +1,4 @@
-package com.example.friendly_fishstick;
+package com.example.shop_recruitment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;

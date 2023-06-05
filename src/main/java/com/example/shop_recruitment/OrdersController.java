@@ -1,4 +1,4 @@
-package com.example.friendly_fishstick;
+package com.example.shop_recruitment;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static com.example.friendly_fishstick.SecurityConfig.ROLE_PREFIX;
+import static com.example.shop_recruitment.SecurityConfig.ROLE_PREFIX;
 
 @RestController
 @RequestMapping("/api/v1/orders")

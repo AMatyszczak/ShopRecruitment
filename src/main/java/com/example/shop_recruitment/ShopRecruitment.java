@@ -1,4 +1,4 @@
-package com.example.friendly_fishstick;
+package com.example.shop_recruitment;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +13,12 @@ import java.util.UUID;
 
 @SpringBootApplication
 @EnableMongoRepositories
-public class FriendlyFishstickApplication {
+public class ShopRecruitment {
 
-	private static final Logger logger = LoggerFactory.getLogger(FriendlyFishstickApplication.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShopRecruitment.class);
 
 	public static void main(String[] args) {
-		SpringApplication.run(FriendlyFishstickApplication.class, args);
+		SpringApplication.run(ShopRecruitment.class, args);
 	}
 
 
