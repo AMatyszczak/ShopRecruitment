@@ -6,7 +6,8 @@ With installed [docker-compose](https://docs.docker.com/compose/install/) and ru
 
 ### Application:
 * runs on http://localhost:8090
-* exposes swagger documentation on http://localhost:8090/docs
+* exposes swagger documentation on http://localhost:8090/docs \
+![swagger front page image](docs/swagger-front-page.png "swagger front page")
 * has predefined two users
   * ADMIN 
     * can create orders, list all orders, list order for a particular user, delete orders
