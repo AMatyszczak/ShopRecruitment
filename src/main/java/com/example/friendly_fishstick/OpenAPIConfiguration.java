@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
         
            customer: {customer:password}""")
 @OpenAPIDefinition(
-        info = @Info(title = "Shop API", version = "v1", description = "Make sure to authorize by clicking 'Authorize' button on right"),
+        info = @Info(title = "Shop API", version = "v1"),
         security = @SecurityRequirement(name = "basicAuth")
 )
 public class OpenAPIConfiguration {
