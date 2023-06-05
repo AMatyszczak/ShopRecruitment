@@ -4,13 +4,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +23,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
+
+    public static final String ROLE_PREFIX = "ROLE_";
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -59,6 +61,13 @@ public class SecurityConfig {
                 .build();
 
         return new InMemoryUserDetailsManager(user, admin);
+    }
+
+    @Bean
+    static RoleHierarchy roleHierarchy() {
+        var hierarchy = new RoleHierarchyImpl();
+        hierarchy.setHierarchy(ROLE_PREFIX + Roles.ADMIN + ">" + ROLE_PREFIX + Roles.CUSTOMER);
+        return hierarchy;
     }
 }
 

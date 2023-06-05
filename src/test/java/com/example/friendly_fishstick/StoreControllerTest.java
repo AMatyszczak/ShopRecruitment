@@ -2,23 +2,15 @@ package com.example.friendly_fishstick;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.FilterChainProxy;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
@@ -31,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Import(SecurityConfig.class)
 @WebMvcTest(StoreController.class)
 class StoreControllerTest {
 
@@ -41,7 +34,7 @@ class StoreControllerTest {
     private OrderRepository orderRepository;
 
     @Test
-    @WithMockUser(username = "customer_1", roles={"ADMIN"})
+    @WithMockUser(username = "customer_1", roles="ADMIN")
     void customerCreateOrder() throws Exception {
         var dto = new OrderDTO("name_1");
         var order = new Order("1", "name_1", "customer_1");
@@ -65,7 +58,7 @@ class StoreControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "customer_1", roles={"ADMIN"})
+    @WithMockUser(username = "customer_1", roles="ADMIN")
     void adminCreateOrder() throws Exception {
         var order = new Order("1", "name_1", "customer_1");
 
@@ -87,7 +80,7 @@ class StoreControllerTest {
     }
 
     @Test
-    @WithMockUser(roles={"ADMIN"})
+    @WithMockUser(roles="ADMIN")
     void adminListsOrders() throws Exception {
         var orders = List.of(new Order("1", "name_1", "customer_1"),
                 new Order("2", "name_2", "customer_2"));
@@ -101,7 +94,7 @@ class StoreControllerTest {
     }
 
     @Test
-    @WithMockUser(roles={"ADMIN"})
+    @WithMockUser(roles="ADMIN")
     void adminListsOrdersOfCustomer() throws Exception {
         var orders = List.of(new Order("1", "name_1", "customer_1"),
                 new Order("2", "name_1", "customer_2"));
@@ -115,7 +108,7 @@ class StoreControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "customer_1", roles={"CUSTOMER"})
+    @WithMockUser(username = "customer_1", roles="CUSTOMER")
     void customerListsHisOrders() throws Exception {
         var orders = List.of(new Order("1", "name_1", "customer_1"),
                 new Order("2", "name_2", "customer_1"));
@@ -129,21 +122,21 @@ class StoreControllerTest {
     }
 
     @Test
-    @WithMockUser(roles={"CUSTOMER"})
+    @WithMockUser(roles="CUSTOMER")
     void customerListsOderUserOrders() throws Exception {
         mockMvc.perform(get("/api/v1/store").param("customerName", "customer_1"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(roles={"CUSTOMER"})
+    @WithMockUser(roles="CUSTOMER")
     void customerListsAllOrders() throws Exception {
         mockMvc.perform(get("/api/v1/store"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(roles={"CUSTOMER"})
+    @WithMockUser(roles = "CUSTOMER")
     void customerDeletesOrder() throws Exception {
         mockMvc.perform(delete("/api/v1/store/1").with(csrf().asHeader()))
                 .andExpect(status().isForbidden());

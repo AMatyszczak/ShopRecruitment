@@ -1,16 +1,16 @@
 package com.example.friendly_fishstick;
 
-import com.mongodb.MongoWriteException;
-import jakarta.annotation.security.RolesAllowed;
-import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
+import static com.example.friendly_fishstick.SecurityConfig.ROLE_PREFIX;
 
 @RestController
 @RequestMapping("/api/v1/store")
@@ -29,25 +29,23 @@ public class StoreController {
 
     @GetMapping
     public List<Order> listOrders(@RequestParam(required = false) String customerName, Authentication auth) {
-        var auths = auth.getAuthorities().stream().toList();
-        if (Objects.isNull(customerName)) {
-            if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_CUSTOMER"))) {
+        if (checkAuthoritiesRole(auth.getAuthorities(), Roles.CUSTOMER)) {
+            if (Objects.isNull(customerName) || !customerName.equals(auth.getName())) {
                 throw new UnauthorizedOperationException();
             }
-        } else {
-            if (customerName.equals(auth.getName())) {
-                return orderRepository.findByCreatedBy(customerName);
-            } else {
-                if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-                    return orderRepository.findByCreatedBy(customerName);
-                }
-                throw new UnauthorizedOperationException();
-            }
+            return orderRepository.findByCreatedBy(customerName);
         }
-        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+        if (checkAuthoritiesRole(auth.getAuthorities(), Roles.ADMIN)) {
+            if (Objects.nonNull(customerName)) {
+                return orderRepository.findByCreatedBy(customerName);
+            }
             return orderRepository.findAll();
         }
         return List.of();
+    }
+
+    private boolean checkAuthoritiesRole(Collection<? extends GrantedAuthority> authorities, Roles role) {
+        return authorities.stream().anyMatch(a -> a.getAuthority().equals(ROLE_PREFIX + role));
     }
 
     @DeleteMapping("{id}")
