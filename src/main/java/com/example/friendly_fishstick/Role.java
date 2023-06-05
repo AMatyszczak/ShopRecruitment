@@ -1,6 +1,6 @@
 package com.example.friendly_fishstick;
 
-public enum Roles {
+public enum Role {
     CUSTOMER,
     ADMIN
 }

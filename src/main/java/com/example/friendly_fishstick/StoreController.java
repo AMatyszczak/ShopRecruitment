@@ -29,13 +29,13 @@ public class StoreController {
 
     @GetMapping
     public List<Order> listOrders(@RequestParam(required = false) String customerName, Authentication auth) {
-        if (checkAuthoritiesRole(auth.getAuthorities(), Roles.CUSTOMER)) {
+        if (checkAuthoritiesRole(auth.getAuthorities(), Role.CUSTOMER)) {
             if (Objects.isNull(customerName) || !customerName.equals(auth.getName())) {
                 throw new UnauthorizedOperationException();
             }
             return orderRepository.findByCreatedBy(customerName);
         }
-        if (checkAuthoritiesRole(auth.getAuthorities(), Roles.ADMIN)) {
+        if (checkAuthoritiesRole(auth.getAuthorities(), Role.ADMIN)) {
             if (Objects.nonNull(customerName)) {
                 return orderRepository.findByCreatedBy(customerName);
             }
@@ -44,7 +44,7 @@ public class StoreController {
         return List.of();
     }
 
-    private boolean checkAuthoritiesRole(Collection<? extends GrantedAuthority> authorities, Roles role) {
+    private boolean checkAuthoritiesRole(Collection<? extends GrantedAuthority> authorities, Role role) {
         return authorities.stream().anyMatch(a -> a.getAuthority().equals(ROLE_PREFIX + role));
     }
 

@@ -31,9 +31,9 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(HttpMethod.GET, "/api/v1/store/**").hasAnyRole(Roles.ADMIN.name(), Roles.CUSTOMER.name())
-                        .requestMatchers(HttpMethod.POST, "/api/v1/store/**").hasAnyRole(Roles.ADMIN.name(), Roles.CUSTOMER.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasRole(Roles.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/v1/store/**").hasAnyRole(Role.ADMIN.name(), Role.CUSTOMER.name())
+                        .requestMatchers(HttpMethod.POST, "/api/v1/store/**").hasAnyRole(Role.ADMIN.name(), Role.CUSTOMER.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasRole(Role.ADMIN.name())
                 )
                 .authorizeHttpRequests(authz -> authz.anyRequest().authenticated())
                 .httpBasic(withDefaults());
@@ -52,12 +52,12 @@ public class SecurityConfig {
         UserDetails user = User.withDefaultPasswordEncoder()
                 .username("customer")
                 .password("password")
-                .roles(Roles.CUSTOMER.name())
+                .roles(Role.CUSTOMER.name())
                 .build();
         UserDetails admin = User.withDefaultPasswordEncoder()
                 .username("admin")
                 .password("password")
-                .roles(Roles.ADMIN.name())
+                .roles(Role.ADMIN.name())
                 .build();
 
         return new InMemoryUserDetailsManager(user, admin);
@@ -66,7 +66,7 @@ public class SecurityConfig {
     @Bean
     static RoleHierarchy roleHierarchy() {
         var hierarchy = new RoleHierarchyImpl();
-        hierarchy.setHierarchy(ROLE_PREFIX + Roles.ADMIN + ">" + ROLE_PREFIX + Roles.CUSTOMER);
+        hierarchy.setHierarchy(ROLE_PREFIX + Role.ADMIN + ">" + ROLE_PREFIX + Role.CUSTOMER);
         return hierarchy;
     }
 }
